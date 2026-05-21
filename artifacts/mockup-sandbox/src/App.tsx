@@ -117,34 +117,4 @@ function Gallery() {
   );
 }
 
-<<<<<<< HEAD
-function getPreviewPath(): string | null {
-  const basePath = getBasePath();
-  const { pathname } = window.location;
-  const local =
-    basePath && pathname.startsWith(basePath)
-      ? pathname.slice(basePath.length) || "/"
-      : pathname;
-  const match = local.match(/^\/preview\/(.+)$/);
-  return match ? match[1] : null;
-}
 
-function App() {
-  const previewPath = getPreviewPath();
-
-  if (previewPath) {
-    return (
-      <PreviewRenderer
-        componentPath={previewPath}
-        modules={discoveredModules}
-      />
-    );
-  }
-
-  return <Gallery />;
-}
-
-export default App;
-=======
-export default App;
->>>>>>> 23c0554 (replace app)
