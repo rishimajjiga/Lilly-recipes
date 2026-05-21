@@ -117,6 +117,7 @@ function Gallery() {
   );
 }
 
+<<<<<<< HEAD
 function getPreviewPath(): string | null {
   const basePath = getBasePath();
   const { pathname } = window.location;
@@ -144,3 +145,6 @@ function App() {
 }
 
 export default App;
+=======
+export default App;
+>>>>>>> 23c0554 (replace app)
