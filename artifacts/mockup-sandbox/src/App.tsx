@@ -1,5 +1,4 @@
 import { useEffect, useState, type ComponentType } from "react";
-
 import { modules as discoveredModules } from "./.generated/mockup-components";
 
 type ModuleMap = Record<string, () => Promise<Record<string, unknown>>>;
@@ -31,7 +30,6 @@ function PreviewRenderer({
 
   useEffect(() => {
     let cancelled = false;
-
     setComponent(null);
     setError(null);
 
@@ -42,12 +40,9 @@ function PreviewRenderer({
         setError(`No component found at ${componentPath}.tsx`);
         return;
       }
-
       try {
         const mod = await loader();
-        if (cancelled) {
-          return;
-        }
+        if (cancelled) return;
         const name = componentPath.split("/").pop()!;
         const comp = _resolveComponent(mod, name);
         if (!comp) {
@@ -58,20 +53,14 @@ function PreviewRenderer({
         }
         setComponent(() => comp);
       } catch (e) {
-        if (cancelled) {
-          return;
-        }
-
+        if (cancelled) return;
         const message = e instanceof Error ? e.message : String(e);
         setError(`Failed to load preview.\n${message}`);
       }
     }
 
     void loadComponent();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [componentPath, modules]);
 
   if (error) {
@@ -81,9 +70,7 @@ function PreviewRenderer({
       </pre>
     );
   }
-
   if (!Component) return null;
-
   return <Component />;
 }
 
@@ -91,27 +78,48 @@ function getBasePath(): string {
   return import.meta.env.BASE_URL.replace(/\/$/, "");
 }
 
-function getPreviewExamplePath(): string {
-  const basePath = getBasePath();
-  return `${basePath}/preview/ComponentName`;
-}
-
 function Gallery() {
+  const basePath = getBasePath();
+
+  // Get all component names from discovered modules
+  const componentNames = Object.keys(discoveredModules)
+    .map((key) => key.replace("./components/mockups/", "").replace(".tsx", ""))
+    .sort();
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
-      <div className="text-center max-w-md">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-3">
-          Component Preview Server
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-semibold text-gray-900 mb-2">
+          Component Gallery
         </h1>
-        <p className="text-gray-500 mb-4">
-          This server renders individual components for the workspace canvas.
+        <p className="text-gray-500 mb-8">
+          Click any component to preview it.
         </p>
-        <p className="text-sm text-gray-400">
-          Access component previews at{" "}
-          <code className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
-            {getPreviewExamplePath()}
-          </code>
-        </p>
+
+        {componentNames.length === 0 ? (
+          <div className="text-center py-16 text-gray-400">
+            <p className="text-lg">No components found.</p>
+            <p className="text-sm mt-2">
+              Add <code className="bg-gray-100 px-1 rounded">.tsx</code> files to{" "}
+              <code className="bg-gray-100 px-1 rounded">src/components/mockups/</code>
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {componentNames.map((name) => (
+              
+                key={name}
+                href={`${basePath}/preview/${name}`}
+                className="block bg-white border border-gray-200 rounded-xl p-5 hover:border-blue-400 hover:shadow-md transition-all"
+              >
+                <div className="text-sm font-mono text-blue-600 mb-1">{name}</div>
+                <div className="text-xs text-gray-400">
+                  /preview/{name}
+                </div>
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -130,7 +138,6 @@ function getPreviewPath(): string | null {
 
 function App() {
   const previewPath = getPreviewPath();
-
   if (previewPath) {
     return (
       <PreviewRenderer
@@ -139,7 +146,6 @@ function App() {
       />
     );
   }
-
   return <Gallery />;
 }
 
